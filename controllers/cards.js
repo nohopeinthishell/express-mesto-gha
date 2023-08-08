@@ -29,7 +29,7 @@ const deleteCard = (req, res) => {
       if (!card) {
         return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: ' Карточка с указанным _id не найдена.' });
       }
-      return res.status(httpConstants.HTTP_STATUS_OK).send('Карточка удалена', card);
+      return res.status(httpConstants.HTTP_STATUS_OK).send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
