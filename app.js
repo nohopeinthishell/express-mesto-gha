@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
-app.use('*', (res) => {
+app.use('*', (req, res) => {
   res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: 'Not Found' });
 });
 
