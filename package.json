@@ -8,7 +8,7 @@
     "dev": "nodemon app.js",
     "lint": "npx eslint ."
   },
-  "author": "",
+  "author": "Sergey Zhdanov",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^8.46.0",

@@ -5,7 +5,7 @@ const getCards = (req, res) => cardSchema
   .find({})
   .then((cards) => res.status(httpConstants.HTTP_STATUS_OK).send(cards))
   .catch((err) => {
-    res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере:', err });
+    res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
   });
 
 const postCard = (req, res) => {
@@ -18,7 +18,7 @@ const postCard = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -35,7 +35,7 @@ const deleteCard = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -56,7 +56,7 @@ const likeCard = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -77,7 +77,7 @@ const dislikeCard = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
