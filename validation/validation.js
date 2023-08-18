@@ -22,7 +22,10 @@ const registerValidation = celebrate({
       .max(30),
     password: Joi.string().required().min(2).max(30),
     avatar: Joi.string().pattern(REGEX),
-  }).unknown(true),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+
+  }),
 });
 
 const loginValidation = celebrate({
@@ -57,7 +60,7 @@ const cardIdValidation = celebrate({
 
 const createCardValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required(),
+    name: Joi.string().required().min(2).max(30),
     link: Joi.string().pattern(REGEX).required(),
   }),
 });
