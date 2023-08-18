@@ -4,12 +4,14 @@ const {
   getUserById,
   updateUser,
   updateAvatar,
+  getUserMe,
 } = require('../controllers/users');
-const { userIdValidation, profileUpdateValidation, avatarUpdateValidation } = require('../validation/validation');
+const { userIdValidation, profileUpdateValidation, avatarUpdateValidation, userMeValidation } = require('../validation/validation');
 
 router.get('/users', getUsers);
-router.get('/users/me', userIdValidation, getUserById);
+router.get('/users/me', userMeValidation, getUserMe);
 router.patch('/users/me', profileUpdateValidation, updateUser);
 router.patch('/users/me/avatar', avatarUpdateValidation, updateAvatar);
+router.get('/users/:id', userIdValidation, getUserById);
 
 module.exports = router;

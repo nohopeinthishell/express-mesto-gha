@@ -2,11 +2,17 @@ const { celebrate, Joi } = require('celebrate');
 
 const REGEX = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~H?&/=]*)$/;
 
-const userIdValidation = celebrate({
+const userMeValidation = celebrate({
   params: Joi.object().keys({
     user: Joi.object().keys({
       _id: Joi.string().length(24).required(),
     }),
+  }),
+});
+
+const userIdValidation = celebrate({
+  params: Joi.object().keys({
+    id: Joi.string().length(24).required(),
   }),
 });
 
@@ -63,4 +69,5 @@ module.exports = {
   profileUpdateValidation,
   cardIdValidation,
   createCardValidation,
+  userMeValidation,
 };

@@ -17,6 +17,23 @@ const getUsers = (req, res, next) => userSchema
 
 const getUserById = (req, res, next) => {
   userSchema
+    .findById(req.params.id)
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
+      }
+      return res.status(httpConstants.HTTP_STATUS_OK).send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new ValidationError(err.message));
+      }
+      next(err);
+    });
+};
+
+const getUserMe = (req, res, next) => {
+  userSchema
     .findById(req.user._id)
     .then((user) => {
       if (!user) {
@@ -149,4 +166,5 @@ module.exports = {
   updateUser,
   updateAvatar,
   login,
+  getUserMe,
 };
