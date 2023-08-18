@@ -35,9 +35,9 @@ const avatarUpdateValidation = celebrate({
 
 const profileUpdateValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().alphanum().max(30)
+    name: Joi.string().required().max(30)
       .min(2),
-    about: Joi.string().required().alphanum().max(30)
+    about: Joi.string().required().max(30)
       .min(2),
   }),
 });
