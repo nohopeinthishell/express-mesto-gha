@@ -18,18 +18,18 @@ const userIdValidation = celebrate({
 
 const registerValidation = celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email().max(30)
-      .min(2),
-    password: Joi.string().required().max(30).min(2),
+    email: Joi.string().required().email().min(2)
+      .max(30),
+    password: Joi.string().required().min(2).max(30),
     avatar: Joi.string().pattern(REGEX),
   }).unknown(true),
 });
 
 const loginValidation = celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email().max(30)
-      .min(2),
-    password: Joi.string().required().max(30).min(2),
+    email: Joi.string().required().email().min(2)
+      .max(30),
+    password: Joi.string().required().min(2).max(30),
   }),
 });
 
@@ -41,10 +41,11 @@ const avatarUpdateValidation = celebrate({
 
 const profileUpdateValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().max(30)
-      .min(2),
-    about: Joi.string().required().max(30)
-      .min(2),
+    name: Joi.string().required().min(2)
+      .max(30),
+    about: Joi.string().required().min(2)
+      .max(30)
+    ,
   }),
 });
 
@@ -57,7 +58,7 @@ const cardIdValidation = celebrate({
 const createCardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required(),
-    link: Joi.string().pattern(REGEX),
+    link: Joi.string().pattern(REGEX).required(),
   }),
 });
 
