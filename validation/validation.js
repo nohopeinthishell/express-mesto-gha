@@ -15,6 +15,7 @@ const registerValidation = celebrate({
     email: Joi.string().required().email().max(30)
       .min(2),
     password: Joi.string().required().max(30).min(2),
+    avatar: Joi.string().pattern(REGEX),
   }).unknown(true),
 });
 
