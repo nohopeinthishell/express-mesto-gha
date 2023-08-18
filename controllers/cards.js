@@ -1,14 +1,15 @@
 const httpConstants = require('http2').constants;
+const ForbiddenError = require('../errors/forbiddenError');
+const NotFoundError = require('../errors/notFoundError');
+const ValidationError = require('../errors/validationError');
 const cardSchema = require('../models/card');
 
-const getCards = (req, res) => cardSchema
+const getCards = (req, res, next) => cardSchema
   .find({})
   .then((cards) => res.status(httpConstants.HTTP_STATUS_OK).send(cards))
-  .catch((err) => {
-    res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-  });
+  .catch((err) => next(err));
 
-const postCard = (req, res) => {
+const postCard = (req, res, next) => {
   const id = req.user._id;
   const { name, link } = req.body;
   cardSchema
@@ -16,30 +17,35 @@ const postCard = (req, res) => {
     .then((card) => res.status(httpConstants.HTTP_STATUS_CREATED).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   cardSchema
-    .findByIdAndRemove(req.params.cardId)
+    .findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: ' Карточка с указанным _id не найдена.' });
+        next(new NotFoundError(' Карточка с указанным _id не найдена.'));
       }
-      return res.status(httpConstants.HTTP_STATUS_OK).send({ message: 'Карточка удалена' });
+      if (card.owner.toString() !== req.user._id) {
+        next(new ForbiddenError('Вы не можете удалить чужую карточку'));
+      }
+      return cardSchema.findByIdAndDelete(req.params.cardId)
+        .then(() => res.status(httpConstants.HTTP_STATUS_OK).send({ message: 'Карточка удалена' }))
+        .catch((err) => next(err));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   cardSchema
     .findByIdAndUpdate(
       req.params.cardId,
@@ -48,19 +54,19 @@ const likeCard = (req, res) => {
     )
     .then((card) => {
       if (!card) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: ' Карточка с указанным _id не найдена.' });
+        next(new NotFoundError(' Карточка с указанным _id не найдена.'));
       }
       return res.status(httpConstants.HTTP_STATUS_OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   cardSchema
     .findByIdAndUpdate(
       req.params.cardId,
@@ -69,15 +75,15 @@ const dislikeCard = (req, res) => {
     )
     .then((card) => {
       if (!card) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: ' Карточка с указанным _id не найдена.' });
+        next(new NotFoundError(' Карточка с указанным _id не найдена.'));
       }
       return res.status(httpConstants.HTTP_STATUS_OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 

@@ -1,44 +1,64 @@
 const httpConstants = require('http2').constants;
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const userSchema = require('../models/user');
+const UnautorizedError = require('../errors/unauthorizedError');
+const ForbiddenError = require('../errors/forbiddenError');
+const ValidationError = require('../errors/validationError');
+const NotFoundError = require('../errors/notFoundError');
+const ConflictError = require('../errors/conflictError');
 
-const getUsers = (req, res) => userSchema
+const salt = bcrypt.genSaltSync(10);
+
+const getUsers = (req, res, next) => userSchema
   .find({})
   .then((users) => res.status(httpConstants.HTTP_STATUS_OK).send(users))
-  .catch((err) => {
-    res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-  });
+  .catch((err) => next(err));
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   userSchema
-    .findById(req.params.id)
+    .findById(req.user._id)
     .then((user) => {
       if (!user) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' });
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
       }
       return res.status(httpConstants.HTTP_STATUS_OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  userSchema
-    .create({ name, about, avatar })
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+
+  if (!email || !password) {
+    next(new ValidationError('Email или пароль не могуть быть пустыми'));
+  }
+
+  bcrypt.hash(password, salt)
+    .then((hash) => userSchema
+      .create({
+        name, about, avatar, email, password: hash,
+      }))
     .then((user) => res.status(httpConstants.HTTP_STATUS_CREATED).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      if (err.code === 11000) {
+        next(new ConflictError('Данный email уже зарегистрирован'));
+      }
+      next(err);
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   userSchema
     .findByIdAndUpdate(
@@ -52,19 +72,19 @@ const updateUser = (req, res) => {
     )
     .then((user) => {
       if (!user) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' });
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
       }
       return res.status(httpConstants.HTTP_STATUS_OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   userSchema
     .findByIdAndUpdate(
@@ -78,16 +98,44 @@ const updateAvatar = (req, res) => {
     )
     .then((user) => {
       if (!user) {
-        return res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' });
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
       }
       return res.status(httpConstants.HTTP_STATUS_OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        next(new ValidationError(err.message));
       }
-      return res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    next(new ValidationError('Email или пароль не могуть быть пустыми'));
+  }
+
+  userSchema.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        next(new UnautorizedError('Неправильные почта или пароль'));
+      }
+      return bcrypt.compare(password, user.password, (err, isValid) => {
+        if (!isValid) {
+          next(new UnautorizedError('Неправильные почта или пароль'));
+        }
+        const token = jwt.sign(
+          { _id: user._id },
+          'some-secret-key',
+          { expiresIn: '7d' },
+        );
+        res.cookie('jwt', token, { httpOnly: true });
+        return res.status(httpConstants.HTTP_STATUS_OK).send({ token });
+      });
+    })
+    .catch((err) => next(err));
 };
 
 module.exports = {
@@ -96,4 +144,5 @@ module.exports = {
   createUser,
   updateUser,
   updateAvatar,
+  login,
 };
