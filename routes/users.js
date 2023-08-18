@@ -6,7 +6,10 @@ const {
   updateAvatar,
   getUserMe,
 } = require('../controllers/users');
-const { userIdValidation, profileUpdateValidation, avatarUpdateValidation, userMeValidation } = require('../validation/validation');
+const {
+  userIdValidation, profileUpdateValidation, avatarUpdateValidation,
+  userMeValidation,
+} = require('../validation/validation');
 
 router.get('/users', getUsers);
 router.get('/users/me', userMeValidation, getUserMe);
