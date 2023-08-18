@@ -75,7 +75,7 @@ const dislikeCard = (req, res, next) => {
     )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError(' Карточка с указанным _id не найдена.'));
+        return next(new NotFoundError(' Карточка с указанным _id не найдена.'));
       }
       return res.status(httpConstants.HTTP_STATUS_OK).send(card);
     })
