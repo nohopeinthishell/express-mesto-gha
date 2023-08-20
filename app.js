@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
+const router = require('./routes');
 
 const { PORT = 3000 } = process.env;
 
@@ -33,8 +34,7 @@ app.post('/signup', registerValidation, createUser);
 
 app.use(auth);
 
-app.use('/', require('./routes/users'));
-app.use('/', require('./routes/cards'));
+app.use(router);
 
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));

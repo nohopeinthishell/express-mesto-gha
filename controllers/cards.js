@@ -17,9 +17,9 @@ const postCard = (req, res, next) => {
     .then((card) => res.status(httpConstants.HTTP_STATUS_CREATED).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError(err.message));
+        return next(new ValidationError(err.message));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -28,20 +28,20 @@ const deleteCard = (req, res, next) => {
     .findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError(' Карточка с указанным _id не найдена.'));
+        return next(new NotFoundError(' Карточка с указанным _id не найдена.'));
       }
       if (card.owner.toString() !== req.user._id) {
-        next(new ForbiddenError('Вы не можете удалить чужую карточку'));
+        return next(new ForbiddenError('Вы не можете удалить чужую карточку'));
       }
-      return cardSchema.findByIdAndDelete(req.params.cardId)
+      return cardSchema.deleteOne(req.params.cardId)
         .then(() => res.status(httpConstants.HTTP_STATUS_OK).send({ message: 'Карточка удалена' }))
         .catch((err) => next(err));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError(err.message));
+        return next(new ValidationError(err.message));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -54,15 +54,15 @@ const likeCard = (req, res, next) => {
     )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError(' Карточка с указанным _id не найдена.'));
+        return next(new NotFoundError(' Карточка с указанным _id не найдена.'));
       }
       return res.status(httpConstants.HTTP_STATUS_OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError(err.message));
+        return next(new ValidationError(err.message));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -81,9 +81,9 @@ const dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError(err.message));
+        return next(new ValidationError(err.message));
       }
-      next(err);
+      return next(err);
     });
 };
 
