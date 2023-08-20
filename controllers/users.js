@@ -117,7 +117,6 @@ const login = (req, res, next) => {
           'some-secret-key',
           { expiresIn: '7d' },
         );
-        res.cookie('jwt', token, { httpOnly: true });
         return res.status(httpConstants.HTTP_STATUS_OK).send({ token });
       });
     })
