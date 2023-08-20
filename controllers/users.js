@@ -92,14 +92,6 @@ const createUser = (req, res, next) => {
     });
 };
 
-const updateUser = (req, res, next) => {
-  updateFunc(req, res, next);
-};
-
-const updateAvatar = (req, res, next) => {
-  updateFunc(req, res, next);
-};
-
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -127,8 +119,7 @@ module.exports = {
   getUsers,
   getUserById,
   createUser,
-  updateUser,
-  updateAvatar,
+  updateFunc,
   login,
   getUserMe,
 };
